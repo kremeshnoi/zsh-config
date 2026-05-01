@@ -1,4 +1,4 @@
-# zsh-config
+# ZSH Config
 
 Portable zsh configuration with a cross-OS installer. One `.zshrc` that works on macOS, Ubuntu/Debian, NixOS, and WSL — silently skipping plugins that aren't installed on the current machine.
 
