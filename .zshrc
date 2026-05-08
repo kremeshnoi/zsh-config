@@ -12,6 +12,18 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE INC_APPEND_HISTORY
 
+# ---- File-type colors ----
+# Palette:
+#   #B1B9F9 — directories (tab completion only; BSD ls stays default white)
+#   #FF5C5F — executables, pipes, broken/missing
+#   #FFBAF3 — symlinks, sockets, devices
+# Must come before `zstyle ... list-colors`, which captures LS_COLORS at zstyle-time.
+export LS_COLORS='no=00:fi=00:di=38;2;177;185;249:ln=38;2;255;186;243:pi=38;2;255;92;95:so=38;2;255;186;243:bd=38;2;255;186;243:cd=38;2;255;186;243:or=38;2;255;92;95:mi=38;2;255;92;95:ex=38;2;255;92;95:su=38;2;255;92;95:sg=38;2;255;92;95:tw=38;2;177;185;249:ow=38;2;177;185;249:st=38;2;177;185;249'
+# BSD ls on macOS supports only 8 colors (no 24-bit). `xx` = default fg → white.
+# Positions: dir, link, socket, pipe, exec, block, char, suid, sgid, dir-sticky, dir-other-writable.
+export LSCOLORS='xxfxcxBxBxegedabagxxxx'
+export CLICOLOR=1
+
 # ---- Completion ----
 autoload -Uz compinit && compinit
 zstyle ':completion:*' menu select
@@ -27,7 +39,7 @@ precmd() { vcs_info }
 zstyle ':vcs_info:git:*' formats ' (%b)'
 zstyle ':vcs_info:*' enable git
 setopt PROMPT_SUBST
-PROMPT='%F{green}%n@%m%f:%F{blue}%~%f%F{#FFBAF3}${vcs_info_msg_0_}%f$ '
+PROMPT='%F{green}%n@%m%f:%F{#B1B9F9}%~%f%F{#FFBAF3}${vcs_info_msg_0_}%f$ '
 
 # ---- Plugins ----
 # zsh-autosuggestions
@@ -65,7 +77,7 @@ ZSH_HIGHLIGHT_STYLES[alias]='fg=#FFBAF3'
 ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#FFBAF3'
 ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#FFBAF3'
 ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#FFBAF3'
-ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#FFBAF3'
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#B1B9F9'
 ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#FFBAF3'
 ZSH_HIGHLIGHT_STYLES[precommand]='fg=#FFBAF3'
 ZSH_HIGHLIGHT_STYLES[path]='none'
@@ -79,21 +91,16 @@ _try_source \
   /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
   "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-# ---- lesspipe (friendlier `less` on non-text files) ----
+# ---- lesspipe ----
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# ---- ls / grep colors ----
+# ---- ls / grep aliases ----
 if command -v dircolors >/dev/null; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-elif [[ "$OSTYPE" == darwin* ]]; then
-    # BSD ls on macOS
-    export CLICOLOR=1
-    alias grep='grep --color=auto'
 fi
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 # ---- Aliases ----
 command -v nvim >/dev/null && alias vi='nvim'
@@ -107,7 +114,7 @@ export FLYCTL_INSTALL="$HOME/.fly"
 export RBENV_ROOT="$HOME/.rbenv"
 export DENO_INSTALL="$HOME/.deno"
 export FNM_PATH="$HOME/.local/share/fnm"
-export PATH="$FLYCTL_INSTALL/bin:$HOME/.cargo/bin:$RBENV_ROOT/bin:$RBENV_ROOT/shims:$DENO_INSTALL/bin:$FNM_PATH:/opt/nvim:/usr/local/go/bin:$PATH"
+export PATH="$HOME/.local/bin:$FLYCTL_INSTALL/bin:$HOME/.cargo/bin:$RBENV_ROOT/bin:$RBENV_ROOT/shims:$DENO_INSTALL/bin:$FNM_PATH:/opt/homebrew/opt/openjdk/bin:/opt/nvim:/usr/local/go/bin:$PATH"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
 # ---- rbenv ----
@@ -117,5 +124,5 @@ command -v rbenv >/dev/null && eval "$(rbenv init - zsh)"
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
 
-# ---- Local overrides (per-machine, not committed) ----
+# ---- Local overrides ----
 [ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
